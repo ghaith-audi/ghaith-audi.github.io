@@ -125,7 +125,15 @@
 .navActive {
   color: var(--ink) !important;
   background: var(--panel) !important;
-  box-shadow: inset 3px 0 0 var(--red);
+}
+
+/* Active item marked with a small node, like the blueprint diagrams */
+.navActive::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  background: var(--red);
 }
 
 .navSub {

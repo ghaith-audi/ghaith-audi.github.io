@@ -28,14 +28,16 @@
   border: 1.5px solid var(--ink);
 }
 
+/* Arrowhead at the end of each step's line */
 .step:not(:last-child)::after {
   content: '';
   position: absolute;
   top: -5px;
   right: -4px;
-  border-left: 7px solid var(--red);
-  border-top: 4.5px solid transparent;
-  border-bottom: 4.5px solid transparent;
+  width: 7px;
+  height: 9px;
+  background: var(--red);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
 
 .stepNo {
