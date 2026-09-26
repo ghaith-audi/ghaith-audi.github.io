@@ -1,0 +1,117 @@
+{
+  "slug": "ags-international-ksa",
+  "order": 6,
+  "featured": false,
+  "name": "AGS International KSA",
+  "category": "Arabic-first market site, Saudi Arabia",
+  "summary": "AGS's dedicated Saudi site: Arabic on arrival, SAR quotations only, and the proving ground where the SEO and analytics stack was built before it shipped to the flagship.",
+  "oneLiner": "The same platform for a new market: Arabic on entry, and the place new work is proven first.",
+  "status": "live",
+  "url": "https://agsintl.sa",
+  "period": "Jul 2026 — Present",
+  "client": "AGS International · Riyadh",
+  "role": "Full-stack developer",
+  "tags": ["Next.js", "TypeScript", "MongoDB", "Edge routing", "SEO"],
+  "visual": {
+    "desktop": "/projects/ags-international-ksa/desktop.webp",
+    "mobile": "/projects/ags-international-ksa/mobile.webp",
+    "full": "/projects/ags-international-ksa/full.webp",
+    "schematic": "",
+    "mobileSchematic": ""
+  },
+  "overview": {
+    "what": "The Saudi website of AGS International, on the same platform as ags.ac. It sells integrated solar solutions for homes, businesses and industry, and adds two modules the UAE site doesn't have: a portfolio of completed projects and ready-made residential solar packages.",
+    "who": "Buyers in Saudi Arabia. Every purchase intent becomes a quotation routed to the Saudi sales team, with a free consultation one tap away on WhatsApp.",
+    "problem": "Same brand, different market: Arabic first, prices in SAR only, no card payments, new features, and it still had to keep trading fixes with the flagship site for years."
+  },
+  "roleDetail": {
+    "summary": "Full-stack developer: I forked the platform, converted it into the Saudi site, split its database and built the new modules.",
+    "items": [
+      "Forked the platform with its git history intact and converted it in one breaking-change commit",
+      "Split the shared MongoDB database into a dedicated one, following a written 194-line runbook",
+      "Built the Projects and Packages modules with per-language publishing",
+      "Arabic-on-entry routing at the edge that still lets visitors switch to English",
+      "A four-part SEO and analytics campaign that was later replayed into ags.ac"
+    ]
+  },
+  "architecture": {
+    "diagram": "ksa-edge",
+    "image": "",
+    "caption": "Fresh visits get Arabic. Deliberate clicks to English get English.",
+    "components": [
+      { "title": "Edge proxy", "body": "Next.js 16's src/proxy.ts handles market routing and the Arabic redirect before any page renders." },
+      { "title": "Market cookie", "body": "Pinned to Saudi Arabia on every response, so the server render and the browser agree on currency and checkout flow from the first paint." },
+      { "title": "Dedicated database", "body": "Content collections copied from the shared database; orders, quotes and messages deliberately started empty." },
+      { "title": "Separate process", "body": "Its own PM2 app on the shared VPS, capped at two instances." }
+    ]
+  },
+  "implementation": [
+    { "title": "Routing", "body": "The config keeps English as the default locale, so English URLs stay canonical and unprefixed for search engines. The edge proxy redirects fresh visits to /ar and lets in-site navigation through." },
+    { "title": "Content targeting", "body": "Project and Package models carry Arabic sibling fields and a language field (en, ar or both), so a case study can be published to Arabic visitors only. Package prices are strings because Saudi packages are quoted as ranges." },
+    { "title": "Commerce", "body": "SAR only and quotation-led: no card payments, every order a lead for the sales team." },
+    { "title": "SEO campaign", "body": "Built in four commits: a full metadata layer with real canonicals, hreflang and social cards; indexation hygiene for the sitemap, noindex and robots; GA4 consent mode with correct page views; and structured data declaring the real Saudi business entity." },
+    { "title": "Deployment", "body": "A second PM2 app beside the flagship on the same VPS, with its own database and uploads directory behind Nginx." }
+  ],
+  "decisions": [
+    {
+      "title": "Keep git history for the same brand in a new market",
+      "context": "The sister brands started from a clean repository. This one is AGS, and would exchange fixes with the flagship for years.",
+      "decision": "Fork with full history and diverge through one breaking-change commit.",
+      "tradeoff": "Continuous two-way replay instead of automatic sharing. The flagship's history now shows seven commits marked as replays of work proven here first."
+    },
+    {
+      "title": "Arabic on entry at the edge, not in the config",
+      "context": "Redirecting “/” to “/ar” greets visitors in Arabic, then traps them: the language switcher links to “/”, and the redirect sends them straight back.",
+      "decision": "Check for a same-host referrer. Fresh visits go to Arabic; navigation from inside the site passes through.",
+      "tradeoff": "One more rule in the edge proxy, and English stays reachable with canonical URLs intact.",
+      "code": "// Arabic is the default *on entry*. Redirect the homepage root to /ar for\n// fresh visits, but let in-site navigation through — the language switcher\n// sending a user to English \"/\" carries a same-host Referer — so English\n// stays reachable instead of being trapped back into Arabic.",
+      "codeLang": "ts"
+    },
+    {
+      "title": "Cap the app at two instances",
+      "context": "The Saudi site shares a VPS with the flagship, and builds on that box already ran out of memory.",
+      "decision": "The flagship uses every core; the Saudi app is bounded on purpose.",
+      "tradeoff": "Less peak throughput for the smaller site, and a server that stays up.",
+      "code": "instances: 2, // Bounded on purpose: this VPS also runs the main ags-website app.\n             // Two cluster-max apps would exhaust RAM (build already OOMs).",
+      "codeLang": "js"
+    },
+    {
+      "title": "Start the new market with an empty sales history",
+      "context": "Splitting the database meant choosing what to copy.",
+      "decision": "Copy content collections; leave orders, quotes, messages, visitors and applications behind.",
+      "tradeoff": "Nothing to migrate later, and no UAE sales data inside the Saudi site."
+    }
+  ],
+  "challenges": [
+    { "problem": "Market routing silently did nothing: Next.js 16 ignores a root middleware.ts when src/proxy.ts exists.", "solution": "Moved all edge logic into src/proxy.ts and left a comment in the file so the next person doesn't lose the same afternoon." },
+    { "problem": "Splitting a database the client's legacy site still used.", "solution": "A full backup first, collection counts verified after restore, and uploaded media copied by hand because it lives outside git. The runbook was corrected during execution and the corrections were kept." },
+    { "problem": "The homepage returned a 500 in production after a function was passed from a Server Component to a Client Component.", "solution": "Functions can't cross the React Server Components boundary; the selection moved to the server and only data crosses now." },
+    { "problem": "The price-range filter still showed AED on the Saudi site.", "solution": "Currency now comes from the country context instead of a hard-coded symbol." }
+  ],
+  "results": {
+    "status": "Live at agsintl.sa. The largest of the four codebases and a strict superset of ags.ac.",
+    "metrics": [
+      { "value": "59.8k", "label": "Lines of TypeScript" },
+      { "value": "101", "label": "Routes" },
+      { "value": "87", "label": "API endpoints" },
+      { "value": "39", "label": "Mongoose models" },
+      { "value": "74", "label": "Admin routes" },
+      { "value": "7", "label": "Commits replayed upstream" }
+    ],
+    "notes": [
+      "The SEO and analytics work was written here first, then replayed into ags.ac once proven."
+    ]
+  },
+  "stack": [
+    { "group": "Framework", "items": ["Next.js 16", "React 19", "TypeScript"] },
+    { "group": "Data", "items": ["MongoDB", "Mongoose 9"] },
+    { "group": "Routing and i18n", "items": ["Edge proxy", "next-intl", "hreflang"] },
+    { "group": "SEO and analytics", "items": ["Schema.org", "GA4 consent mode", "Search Console API"] },
+    { "group": "Infrastructure", "items": ["Linux VPS", "Nginx", "PM2", "Let's Encrypt"] }
+  ],
+  "related": ["ags-international", "darlux", "hmc-international"],
+  "seo": {
+    "title": "AGS International KSA · Arabic-first market site",
+    "description": "Case study: the Saudi site on the AGS platform, with Arabic-on-entry edge routing, a production database split and an SEO stack later shipped to the flagship."
+  }
+}

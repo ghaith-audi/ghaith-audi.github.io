@@ -1,0 +1,117 @@
+{
+  "slug": "tracki",
+  "order": 3,
+  "featured": false,
+  "name": "Geofence & TRACKi",
+  "category": "GPS workforce & fleet tracking",
+  "summary": "Automatic attendance when staff cross a geofence, payroll from the result, and a vehicle-tracking product, including a TCP server that reads GPS hardware directly.",
+  "oneLiner": "GPS workforce tracking and fleet tracking, down to the device protocol.",
+  "status": "private",
+  "url": "",
+  "period": "Nov 2025 — Mar 2026",
+  "client": "Hometecs",
+  "role": "Backend, GPS service and web dashboards",
+  "tags": ["Django", "Channels", "Celery", "asyncio", "React"],
+  "visual": {
+    "desktop": "",
+    "mobile": "",
+    "full": "",
+    "schematic": "gt06",
+    "mobileSchematic": "geofence"
+  },
+  "overview": {
+    "what": "An attendance and payroll system for staff who work in the field, and TRACKi, a vehicle-tracking service sold to other businesses. Both run on the same backend and database, separated by role.",
+    "who": "Managers configure geofences and policies, watch a live map and run payroll. Employees are checked in automatically through a mobile app. TRACKi customers get their own fleet dashboard with devices, geofences, alerts and reports.",
+    "problem": "Manual check-ins and door-mounted biometrics are slow, easy to game and useless for field staff. A geofence replaces the door with a virtual boundary: cross it, and the attendance record opens or closes by itself."
+  },
+  "roleDetail": {
+    "summary": "I built the Django backend, the GPS tracker service and the React dashboards. The Flutter employee app was built together with a teammate.",
+    "items": [
+      "Django backend: 7 apps, 26 models, about 125 REST endpoints and 4 WebSocket consumers",
+      "A FastAPI and asyncio TCP service that parses the GT06 and HQ tracker protocols",
+      "React dashboards with three role layouts, 43 routes and live Leaflet maps with road snapping",
+      "Payroll, suspicious check-in scoring, and TRACKi subscriptions with device quotas",
+      "Specifications, deployment runbooks and Arabic client-facing technical documentation"
+    ]
+  },
+  "architecture": {
+    "diagram": "tracki-system",
+    "image": "",
+    "caption": "WebSockets carry location; REST carries everything else.",
+    "components": [
+      { "title": "Clients", "body": "React dashboards for managers, employees and TRACKi customers; the Flutter employee app streaming GPS; tracker hardware identified by IMEI." },
+      { "title": "Django + Channels", "body": "REST for ordinary operations and four WebSocket consumers: employee location in, manager dashboard out, TRACKi live, and a raw device monitor." },
+      { "title": "GPS tracker service", "body": "FastAPI and asyncio. Accepts long-lived TCP connections from trackers, validates and decodes packets, and sends commands back down the socket." },
+      { "title": "Redis + Celery", "body": "Message broker, channel layer and per-device filter state; a geofence sweep every 30 seconds and an hourly subscription check." },
+      { "title": "Mapping services", "body": "Traccar as the production GPS server, OSRM for road snapping, OpenStreetMap tiles and Firebase for push." }
+    ]
+  },
+  "implementation": [
+    { "title": "Device protocols", "body": "GT06, the binary protocol most low-cost trackers speak: start bits 0x78 0x78, length, protocol number, payload, serial number, a CRC-ITU checksum against a 256-entry table, and stop bits 0x0D 0x0A. Plus HQ, an ASCII protocol with NMEA-style coordinates converted to decimal degrees." },
+    { "title": "TCP server", "body": "One asyncio task per connection with a 300-second read timeout so dead sockets are reclaimed. Partial reads are buffered until a whole packet arrives, and packets are decoded into typed dataclasses for login, location, heartbeat and alarm." },
+    { "title": "Real-time", "body": "Django Channels with Redis. The phone streams positions over a WebSocket; crossing a boundary records an entry or exit event and opens or closes the day's attendance." },
+    { "title": "Database", "body": "MySQL, 26 models. A unique constraint on (user, date) means a flaky connection can't create a second attendance record. A one-row-per-employee status table acts as a write-through cache, so the live map is one indexed read." },
+    { "title": "Payroll", "body": "Worked days, late days, absences and overtime calculated from attendance against a configurable policy. Salary profiles are date-ranged and frozen onto each payroll entry." },
+    { "title": "Mobile", "body": "Flutter with BLoC and dependency injection, built with a teammate. An offline queue in Hive replays cached points and check-ins with their original timestamps." }
+  ],
+  "decisions": [
+    {
+      "title": "WebSockets for location, REST for everything else",
+      "context": "Position data is continuous and latency-sensitive; everything else is ordinary CRUD.",
+      "decision": "Split on that line. Location streams over Channels; every other operation is REST.",
+      "tradeoff": "Two transports to maintain. Each half stays simple, cacheable and easy to document."
+    },
+    {
+      "title": "Build our own GPS server, then run Traccar",
+      "context": "Parsing tracker packets ourselves removes a dependency; a mature open-source server supports far more hardware.",
+      "decision": "Both sit behind one GPS-backend adapter that managers can switch from the dashboard. Traccar is the production path; the custom asyncio server is built and kept switchable.",
+      "tradeoff": "Two backends behind one interface, in exchange for a decision that stays reversible. The reasoning is written up in a decision document."
+    },
+    {
+      "title": "Self-hosted maps after a written cost study",
+      "context": "Google Maps, Mapbox and self-hosted OpenStreetMap compared on setup cost, monthly cost at 100, 1,000 and 10,000 devices, lock-in, offline use, and sanctions risk for operating in Syria.",
+      "decision": "Self-hosted OpenStreetMap tiles with OSRM for road snapping.",
+      "tradeoff": "More to operate ourselves, with no variable cost and no vendor that could switch the service off."
+    },
+    {
+      "title": "Freeze salary data onto each payslip",
+      "context": "A raise next month must not rewrite last month's payslip.",
+      "decision": "Each payroll entry stores a JSON snapshot of the salary profile used, and profiles carry effective-from and effective-to dates instead of being overwritten.",
+      "tradeoff": "Some duplicated data, in exchange for payroll history that can always be reconstructed."
+    }
+  ],
+  "challenges": [
+    { "problem": "A parked vehicle isn't still: consumer GPS drifts about 15 metres between readings, so cars twitched around car parks all night.", "solution": "A stationary filter detects stops and locks the displayed position until real movement resumes, with per-device state in Redis so it survives restarts." },
+    { "problem": "A TCP stream has no request and response pairing, so a device's reply can't be matched to the command that caused it.", "solution": "send_command() writes the command and waits on an asyncio Future that the receive loop resolves, guarded by a Lock and a timeout." },
+    { "problem": "Automatic attendance creates an incentive to fake it.", "solution": "Every check-in is scored on distance, reported accuracy, mock-location flags and speed, and marked valid, suspicious or invalid for a manager to review." },
+    { "problem": "Field staff lose signal, and a dropped check-in is worse than none.", "solution": "The app queues points and events offline and replays them through batch endpoints with their original timestamps." }
+  ],
+  "results": {
+    "status": "Private deployment on the client's infrastructure. It needs physical GPS trackers to demonstrate, so there is no public instance; a recorded walkthrough is available on request.",
+    "metrics": [
+      { "value": "2", "label": "Device protocols (GT06, HQ)" },
+      { "value": "4", "label": "WebSocket consumers" },
+      { "value": "~125", "label": "REST endpoints" },
+      { "value": "26", "label": "Data models" },
+      { "value": "63", "label": "Specs and runbooks written" },
+      { "value": "~43k", "label": "Lines across backend, GPS service and web" }
+    ],
+    "notes": [
+      "Traccar is the live GPS backend. The custom TCP server is built and switchable, not the production path.",
+      "The Flutter app was built together with a teammate."
+    ]
+  },
+  "stack": [
+    { "group": "Backend", "items": ["Python", "Django 5", "Django REST Framework", "Django Channels", "Celery", "Redis"] },
+    { "group": "GPS service", "items": ["FastAPI", "asyncio", "SQLAlchemy"] },
+    { "group": "Database", "items": ["MySQL"] },
+    { "group": "Frontend", "items": ["React 18", "Vite", "Zustand", "Leaflet", "Tailwind CSS"] },
+    { "group": "Mobile", "items": ["Flutter (with a teammate)"] },
+    { "group": "Services", "items": ["Traccar", "OSRM", "OpenStreetMap", "Firebase Cloud Messaging"] }
+  ],
+  "related": [],
+  "seo": {
+    "title": "Geofence & TRACKi · GPS workforce and fleet tracking",
+    "description": "Case study: geofenced attendance, payroll and fleet tracking with Django Channels and an asyncio TCP server that parses the GT06 GPS protocol."
+  }
+}

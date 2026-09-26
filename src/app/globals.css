@@ -1,0 +1,604 @@
+/* ─────────────────────────────────────────────────────────────
+   Blueprint design tokens
+   Light = drafting paper · Dark = blueprint
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --paper: #eef1ec;
+  --sheet: #f7f8f4;
+  --panel: #e4e9e2;
+  --ink: #13283b;
+  --ink-2: #44586a;
+  --ink-3: #697a89;
+  --rule: rgba(19, 40, 59, 0.26);
+  --rule-2: rgba(19, 40, 59, 0.12);
+  --grid: rgba(19, 40, 59, 0.042);
+  --grid-2: rgba(19, 40, 59, 0.075);
+  --red: #b3362a;
+  --red-soft: rgba(179, 54, 42, 0.08);
+  --live: #1e6b45;
+  --priv: #8a5300;
+  --on-ink: #f7f8f4;
+  --device: #10202f;
+  --device-2: #1d3246;
+  --device-edge: rgba(255, 255, 255, 0);
+  --shadow: 0 30px 60px -34px rgba(19, 40, 59, 0.5);
+  --photo-blend: multiply;
+  --photo-filter: grayscale(1) contrast(1.06);
+  --header-bg: rgba(238, 241, 236, 0.86);
+  --inverse-bg: #0f2a44;
+  --inverse-ink: #e6eef6;
+  --inverse-ink-2: #a9bfd2;
+  --inverse-rule: rgba(230, 238, 246, 0.2);
+  --inverse-grid: rgba(230, 238, 246, 0.06);
+  --inverse-red: #ff9483;
+
+  --font-display: var(--font-archivo), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-martian), ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-arabic: var(--font-kufi), 'Segoe UI', Tahoma, 'Geeza Pro', sans-serif;
+
+  --max: 1240px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --section: clamp(76px, 10vw, 140px);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0b2640;
+    --sheet: #0f2d4b;
+    --panel: #12344f;
+    --ink: #e3edf6;
+    --ink-2: #a8bfd3;
+    --ink-3: #7f9ab1;
+    --rule: rgba(227, 237, 246, 0.3);
+    --rule-2: rgba(227, 237, 246, 0.14);
+    --grid: rgba(227, 237, 246, 0.045);
+    --grid-2: rgba(227, 237, 246, 0.085);
+    --red: #ff9483;
+    --red-soft: rgba(255, 148, 131, 0.12);
+    --live: #78dba5;
+    --priv: #f2c45b;
+    --on-ink: #0b2640;
+    --device: #061525;
+    --device-2: #0d2338;
+    --device-edge: rgba(227, 237, 246, 0.22);
+    --shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+    --photo-blend: luminosity;
+    --photo-filter: grayscale(1) contrast(1.1) brightness(1.05);
+    --header-bg: rgba(11, 38, 64, 0.84);
+    --inverse-bg: #061a2d;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #0b2640;
+  --sheet: #0f2d4b;
+  --panel: #12344f;
+  --ink: #e3edf6;
+  --ink-2: #a8bfd3;
+  --ink-3: #7f9ab1;
+  --rule: rgba(227, 237, 246, 0.3);
+  --rule-2: rgba(227, 237, 246, 0.14);
+  --grid: rgba(227, 237, 246, 0.045);
+  --grid-2: rgba(227, 237, 246, 0.085);
+  --red: #ff9483;
+  --red-soft: rgba(255, 148, 131, 0.12);
+  --live: #78dba5;
+  --priv: #f2c45b;
+  --on-ink: #0b2640;
+  --device: #061525;
+  --device-2: #0d2338;
+  --device-edge: rgba(227, 237, 246, 0.22);
+  --shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+  --photo-blend: luminosity;
+  --photo-filter: grayscale(1) contrast(1.1) brightness(1.05);
+  --header-bg: rgba(11, 38, 64, 0.84);
+  --inverse-bg: #061a2d;
+  color-scheme: dark;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Base
+   ───────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid-2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-2) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  line-height: 1.62;
+  font-variation-settings: 'wdth' 100;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--red);
+  color: var(--on-ink);
+}
+
+:focus-visible {
+  outline: 2px dashed var(--red);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+:lang(ar) {
+  font-family: var(--font-arabic);
+  font-variation-settings: normal;
+  letter-spacing: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--on-ink);
+  padding: 10px 14px;
+  font: 600 12px/1 var(--font-mono);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Layout helpers
+   ───────────────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: calc(var(--max) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section);
+}
+
+.section + .section {
+  padding-top: 0;
+}
+
+/* Section header: eyebrow, title, lead */
+.eyebrow {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 600 11px/1.4 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.eyebrow b {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.eyebrow::after {
+  content: '';
+  height: 1px;
+  flex: 0 0 40px;
+  background: var(--rule);
+}
+
+.sec-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(16px, 4vw, 64px);
+  align-items: end;
+  margin-bottom: clamp(36px, 5vw, 64px);
+}
+
+.sec-title {
+  margin: 14px 0 0;
+  font-size: clamp(36px, 5.4vw, 66px);
+  line-height: 0.98;
+  font-weight: 780;
+  font-variation-settings: 'wdth' 118;
+  letter-spacing: -0.02em;
+}
+
+.sec-lead {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: clamp(16px, 1.3vw, 18px);
+  max-width: 54ch;
+}
+
+@media (max-width: 860px) {
+  .sec-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Buttons, tags, status
+   ───────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font: 600 12px/1 var(--font-mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.btn:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.btn svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 11.5px/1 var(--font-mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding-bottom: 5px;
+  border-bottom: 1.5px solid var(--red);
+}
+
+.link-arrow svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.18s ease;
+}
+
+.link-arrow:hover svg {
+  transform: translateX(3px);
+}
+
+.tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tags li {
+  font: 500 11px/1 var(--font-mono);
+  padding: 7px 9px;
+  border: 1px solid var(--rule);
+  color: var(--ink-2);
+  background: color-mix(in srgb, var(--sheet) 70%, transparent);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 10.5px/1.3 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.status-live,
+.status-pilot {
+  color: var(--live);
+}
+
+.status-live::before,
+.status-pilot::before {
+  background: var(--live);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 20%, transparent);
+}
+
+.status-private {
+  color: var(--priv);
+}
+
+.status-private::before {
+  width: 5px;
+  height: 5px;
+  border: 2px solid var(--priv);
+  background: linear-gradient(90deg, var(--priv) 50%, transparent 50%);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Diagram primitives (shared by schematics and case-study diagrams)
+   ───────────────────────────────────────────────────────────── */
+.dg {
+  font-family: var(--font-mono);
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dg .ln {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.3;
+}
+
+.dg .ln-soft {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1;
+}
+
+.dg .bx {
+  fill: var(--sheet);
+  stroke: var(--ink);
+  stroke-width: 1.3;
+}
+
+.dg .bx2 {
+  fill: var(--panel);
+  stroke: var(--ink);
+  stroke-width: 1.3;
+}
+
+.dg .bxh {
+  fill: url(#dg-hatch);
+  stroke: var(--ink);
+  stroke-width: 1.3;
+}
+
+.dg .bxr {
+  fill: var(--red-soft);
+  stroke: var(--red);
+  stroke-width: 1.4;
+}
+
+.dg .bxd {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.1;
+  stroke-dasharray: 4 3;
+}
+
+.dg .t {
+  fill: var(--ink);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.dg .tb {
+  fill: var(--ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.dg .t2 {
+  fill: var(--ink-2);
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+}
+
+.dg .t3 {
+  fill: var(--ink-3);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+.dg .big {
+  fill: var(--ink);
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.dg .r {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.3;
+}
+
+.dg .rd {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.3;
+  stroke-dasharray: 4 3;
+}
+
+.dg .rt {
+  fill: var(--red);
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+}
+
+.dg .dash {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.dg .dotf {
+  fill: var(--ink);
+}
+
+.dg .dotr {
+  fill: var(--red);
+}
+
+.dg .ar {
+  font-family: var(--font-arabic);
+  fill: var(--ink);
+  font-size: 15px;
+}
+
+.dg .ar2 {
+  font-family: var(--font-arabic);
+  fill: var(--ink-2);
+  font-size: 13px;
+}
+
+.mk {
+  fill: var(--ink);
+}
+
+.mkr {
+  fill: var(--red);
+}
+
+.hatch-bg {
+  fill: var(--panel);
+}
+
+.hatch-line {
+  stroke: var(--ink-3);
+  stroke-width: 1;
+}
+
+/* Wide diagrams scroll sideways on phones instead of shrinking to unreadable text */
+.diagram-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.diagram-scroll > svg {
+  min-width: 560px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Larger type for schematics drawn on device screens */
+.dg.sc .tb {
+  font-size: 16px;
+}
+
+.dg.sc .t {
+  font-size: 15px;
+}
+
+.dg.sc .t2 {
+  font-size: 13px;
+}
+
+.dg.sc .t3 {
+  font-size: 12px;
+}
+
+.dg.sc .rt {
+  font-size: 13.5px;
+}
+
+.copy-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  font: 600 10.5px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}

@@ -1,0 +1,108 @@
+{
+  "slug": "dentecs",
+  "order": 9,
+  "featured": false,
+  "name": "Dentecs",
+  "category": "Dental clinic management",
+  "summary": "Four workspaces for a dental clinic on one data model, built around the FDI tooth-numbering standard, with prices frozen onto every treatment session.",
+  "oneLiner": "Clinic software that thinks in teeth.",
+  "status": "private",
+  "url": "",
+  "period": "2024",
+  "client": "A dental clinic",
+  "role": "Data model, API and role workspaces",
+  "tags": ["Django", "DRF", "React", "MySQL", "MUI"],
+  "visual": {
+    "desktop": "",
+    "mobile": "",
+    "full": "",
+    "schematic": "fdi",
+    "mobileSchematic": ""
+  },
+  "overview": {
+    "what": "A dental clinic management system with four workspaces over one shared data model: reception, treatment, accounting and management. It includes an interactive dental chart, multi-tooth treatment sessions, orthodontic planning, prescriptions, X-ray storage and invoicing.",
+    "who": "Dental clinic staff. Reception books and registers, doctors treat and record, accounting invoices, and management configures the price list and watches the numbers.",
+    "problem": "A clinic is four jobs that barely overlap, and generic practice software crowds them onto one screen. It also has to be precise: a system that records “tooth 7” will eventually put a filling on the wrong side of someone's mouth."
+  },
+  "roleDetail": {
+    "summary": "My first professional project. I met the dentist to gather requirements, then built the data model, the API and the four workspaces.",
+    "items": [
+      "19 models and 57 API endpoints in Django REST Framework",
+      "The interactive dental chart, multi-tooth sessions and orthodontic planning",
+      "An appointment scheduler, invoicing, and a full-screen waiting-room display",
+      "Speech-to-text for clinical notes and QR-code patient lookup",
+      "Started with server-rendered templates, then split the system into a REST API and a React frontend after a senior engineer's review"
+    ]
+  },
+  "architecture": {
+    "diagram": "dentecs-model",
+    "image": "",
+    "caption": "The data model knows it is about teeth.",
+    "components": [
+      { "title": "Patient", "body": "Carries per-tooth JSON maps keyed by FDI code: whether each tooth is present, orthodontic anchor points, and the links between anchored teeth." },
+      { "title": "Treatment session", "body": "One visit, one doctor, many teeth and many procedures, with the price of each procedure copied onto the session." },
+      { "title": "Clinic records", "body": "Appointments, invoices with serial numbers, prescriptions, diagnoses, treatment plans, panoramic X-rays and lab orders." },
+      { "title": "Four workspaces", "body": "Reception, treatment, accounting and management as separate React areas over one Django REST API." }
+    ]
+  },
+  "implementation": [
+    { "title": "Domain model", "body": "FDI notation throughout: 32 permanent and 20 primary teeth addressed by quadrant and position, in the models, the seed fixtures and the frontend chart." },
+    { "title": "Orthodontics", "body": "Anchor connections between teeth are stored per patient as a graph and drawn as lines on the chart." },
+    { "title": "Work classification", "body": "Each procedure type has a colour and an icon that render directly on the chart, so a doctor reads a patient's history as marks across the mouth instead of rows in a table." },
+    { "title": "Interface", "body": "A scheduler built on FullCalendar and DHTMLX, printable invoices, an ApexCharts dashboard, QR generation and scanning, and speech recognition for notes." },
+    { "title": "Stack", "body": "Django 4.1, Django REST Framework and MySQL. React 18 with Redux Toolkit, MUI and Ant Design on the Mantis admin template, with an Arabic translation layer through i18next." }
+  ],
+  "decisions": [
+    {
+      "title": "Speak the dentist's standard",
+      "context": "Teeth aren't a list of 32 things. Dentists address them by quadrant and position.",
+      "decision": "Adopt FDI World Dental Federation notation everywhere, and initialise each patient's per-tooth maps on first save.",
+      "tradeoff": "More domain research before the first model, and a schema a dentist would recognise.",
+      "code": "teeth_status         = {tooth: True for tooth in teeth_numbers}\nfulcrums             = {tooth: False for tooth in teeth_numbers}\nfulcrums_connections = {tooth: [] for tooth in teeth_numbers}",
+      "codeLang": "python"
+    },
+    {
+      "title": "Freeze prices onto the session",
+      "context": "Raising the price of a crown next month must not change last month's invoice.",
+      "decision": "Copy each procedure's price onto the treatment session when it is recorded.",
+      "tradeoff": "A little duplicated data, and invoices that never drift. The same rule later reappeared in the Geofence payroll.",
+      "code": "# this field holds the works prices, so that changing the work price\n# won't affect the session\nworks_prices = models.JSONField(default=dict, blank=True, null=True)",
+      "codeLang": "python"
+    },
+    {
+      "title": "Dictation for gloved hands",
+      "context": "A dentist in the middle of a treatment can't type.",
+      "decision": "Speech recognition for clinical notes in the treatment screens.",
+      "tradeoff": "A browser feature with uneven support, used where it removes the most friction."
+    }
+  ],
+  "challenges": [
+    { "problem": "Invoicing a visit that covers several teeth as one unit.", "solution": "A multi-tooth session model: one visit, many teeth, many procedures, one payment state." },
+    { "problem": "Reading a long treatment history at a glance.", "solution": "Colour-and-icon classifications drawn on the chart per tooth." },
+    { "problem": "The first version mixed server-rendered pages with business logic.", "solution": "Rebuilt as a Django REST API with a separate React frontend, which I learned for the purpose." }
+  ],
+  "results": {
+    "status": "Delivered as a private deployment for a dental clinic. There is no public instance; screenshots use seeded demo patients.",
+    "metrics": [
+      { "value": "57", "label": "API endpoints" },
+      { "value": "19", "label": "Data models" },
+      { "value": "52", "label": "Teeth modelled" },
+      { "value": "4", "label": "Role workspaces" },
+      { "value": "11.4k", "label": "Lines of application pages" },
+      { "value": "978", "label": "Line scheduler component" }
+    ],
+    "notes": [
+      "The UI shell is based on the Mantis MUI template; all clinic functionality is built on top of it."
+    ]
+  },
+  "stack": [
+    { "group": "Backend", "items": ["Python", "Django 4.1", "Django REST Framework"] },
+    { "group": "Database", "items": ["MySQL"] },
+    { "group": "Frontend", "items": ["React 18", "Redux Toolkit", "MUI", "Ant Design", "FullCalendar", "ApexCharts", "i18next"] }
+  ],
+  "related": [],
+  "seo": {
+    "title": "Dentecs · Dental clinic management",
+    "description": "Case study: a Django REST and React clinic system modelled on FDI tooth notation, with multi-tooth sessions and frozen price snapshots."
+  }
+}

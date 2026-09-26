@@ -1,0 +1,191 @@
+{
+  "slug": "darlux",
+  "order": 7,
+  "featured": false,
+  "name": "Darlux",
+  "category": "Arabic-first storefront, Syria",
+  "summary": "The AGS platform rebuilt Arabic-first for the Syrian market, with local payment methods and no dependency on Stripe.",
+  "oneLiner": "Solar energy and batteries for Syria: Arabic by default, with local payment methods.",
+  "status": "live",
+  "url": "https://darlux.net",
+  "period": "Mar — Apr 2026",
+  "client": "Darlux · Damascus",
+  "role": "Full-stack developer",
+  "tags": [
+    "Next.js",
+    "TypeScript",
+    "MongoDB",
+    "RTL",
+    "Local payments"
+  ],
+  "visual": {
+    "desktop": "/projects/darlux/desktop.webp",
+    "mobile": "/projects/darlux/mobile.webp",
+    "full": "/projects/darlux/full.webp",
+    "schematic": "",
+    "mobileSchematic": ""
+  },
+  "overview": {
+    "what": "A storefront and content management system for Darlux, a solar-energy and battery distributor in Damascus, built on the same platform as ags.ac.",
+    "who": "Customers in Syria who read Arabic first. English is available, but Arabic is the site's primary language.",
+    "problem": "Stripe doesn't operate in Syria, and making Arabic the primary language, rather than a translation, changes a great deal of layout."
+  },
+  "roleDetail": {
+    "summary": "Full-stack developer: I adapted the platform for a new brand and market.",
+    "items": [
+      "Forked the platform with a clean history and rebranded it: palette, logo, favicon and email templates",
+      "Made Arabic the default locale and moved English to /en",
+      "Made Stripe optional and added ShamCash and SyriatelCash as first-class payment methods",
+      "Ran a right-to-left audit that fixed 37 issues across 12 public components"
+    ]
+  },
+  "architecture": {
+    "diagram": "darlux-rails",
+    "image": "",
+    "caption": "Locale and payment methods decided by configuration, not code.",
+    "components": [
+      {
+        "title": "Locale routing",
+        "body": "Arabic is the unprefixed default; English lives at /en."
+      },
+      {
+        "title": "Country model",
+        "body": "Syria's entry lists the payment methods checkout offers: ShamCash, SyriatelCash, cash on delivery and bank transfer."
+      },
+      {
+        "title": "Brand layer",
+        "body": "One @theme block of design tokens re-skins the whole site, from buttons to transactional emails."
+      }
+    ]
+  },
+  "implementation": [
+    {
+      "title": "Internationalisation",
+      "body": "next-intl with Arabic as the default locale and browser locale detection turned off, so the site is always Arabic first."
+    },
+    {
+      "title": "Payments",
+      "body": "Checkout methods come from the Country model. The application builds and boots with no Stripe credentials at all."
+    },
+    {
+      "title": "Right-to-left details",
+      "body": "Logical CSS properties throughout, phone numbers kept left-to-right inside Arabic text, carousel fades reversed, map legends and navbar categories translated."
+    },
+    {
+      "title": "Branding",
+      "body": "Primary red #EE212E and the Darlux logo applied through the token layer, with brand colours carried into email templates and a footer logo inverted for dark backgrounds."
+    }
+  ],
+  "decisions": [
+    {
+      "title": "A clean repository for a sister brand",
+      "context": "Darlux isn't AGS. Shared history would only be noise.",
+      "decision": "Start from a clean git init and cherry-pick upstream fixes when they matter.",
+      "tradeoff": "Fixes are copied deliberately. Four fixes landed in both repositories on the same day as the flagship: one bug fixed, three sites healed."
+    },
+    {
+      "title": "Arabic by configuration, not by redirect",
+      "context": "The Saudi site uses an edge redirect so English URLs stay canonical. Darlux is essentially Arabic-only.",
+      "decision": "Set Arabic as the default locale in configuration.",
+      "tradeoff": "Simpler and total, and the right choice when Arabic is the site's main audience.",
+      "code": "defaultLocale: \"ar\",\nlocaleDetection: false,",
+      "codeLang": "ts"
+    },
+    {
+      "title": "Make Stripe optional",
+      "context": "No Stripe in the Syrian market.",
+      "decision": "The app runs without any Stripe configuration; local payment methods are first-class.",
+      "tradeoff": "One more conditional in checkout, and the same change later helped the Saudi and HMC sites, which don't use Stripe either."
+    }
+  ],
+  "challenges": [
+    {
+      "problem": "Making Arabic primary surfaced a long tail of layout bugs.",
+      "solution": "One right-to-left audit: 37 fixes across 12 public components."
+    },
+    {
+      "problem": "Older content without a language tag disappeared once Arabic became the default.",
+      "solution": "Items without a locale are still shown, so nothing silently vanished."
+    }
+  ],
+  "results": {
+    "status": "Live at darlux.net.",
+    "metrics": [
+      {
+        "value": "48.8k",
+        "label": "Lines of TypeScript"
+      },
+      {
+        "value": "82",
+        "label": "Routes"
+      },
+      {
+        "value": "62",
+        "label": "API endpoints"
+      },
+      {
+        "value": "32",
+        "label": "Mongoose models"
+      },
+      {
+        "value": "37",
+        "label": "RTL fixes in one audit"
+      },
+      {
+        "value": "105",
+        "label": "React components"
+      }
+    ],
+    "notes": []
+  },
+  "stack": [
+    {
+      "group": "Framework",
+      "items": [
+        "Next.js 16",
+        "React 19",
+        "TypeScript"
+      ]
+    },
+    {
+      "group": "Data",
+      "items": [
+        "MongoDB",
+        "Mongoose 9"
+      ]
+    },
+    {
+      "group": "i18n",
+      "items": [
+        "next-intl",
+        "Arabic RTL"
+      ]
+    },
+    {
+      "group": "Payments",
+      "items": [
+        "ShamCash",
+        "SyriatelCash",
+        "Cash on delivery",
+        "Bank transfer"
+      ]
+    },
+    {
+      "group": "Infrastructure",
+      "items": [
+        "Linux VPS",
+        "Nginx",
+        "PM2"
+      ]
+    }
+  ],
+  "related": [
+    "ags-international",
+    "ags-international-ksa",
+    "hmc-international"
+  ],
+  "seo": {
+    "title": "Darlux · Arabic-first storefront for Syria",
+    "description": "Case study: the AGS platform adapted for Syria, Arabic by default, with ShamCash and SyriatelCash payments and a 37-fix right-to-left audit."
+  }
+}

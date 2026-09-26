@@ -1,0 +1,128 @@
+{
+  "slug": "4longage",
+  "order": 2,
+  "featured": false,
+  "name": "4longAge",
+  "category": "Elderly home-care platform",
+  "summary": "A home-care marketplace for Homs: families book verified nurses, follow each visit live and keep a full medical record. Built solo, from schema to server.",
+  "oneLiner": "Booking, live visit tracking, medical records and payments for elderly care in Homs, Syria.",
+  "status": "pilot",
+  "url": "https://4longage.com",
+  "period": "Aug 2026 — Present",
+  "client": "",
+  "role": "Sole engineer",
+  "tags": ["Django", "Django Ninja", "PostgreSQL", "Celery", "Next.js"],
+  "visual": {
+    "desktop": "",
+    "mobile": "",
+    "full": "",
+    "schematic": "longage-states",
+    "mobileSchematic": ""
+  },
+  "overview": {
+    "what": "4longAge connects families with verified nurses and caregivers. A family books from a catalogue of 14 services, watches the visit move from en route to completed on their phone, and reads the nurse's report with vital signs and photos. Around that sit a permanent medical record, a medication reminder engine, a family doctor with revocable access, an equipment storefront and an operations console.",
+    "who": "Syrian families where an elderly parent lives in Homs and the child who pays often lives abroad. Six roles share one system: family, senior, care provider, doctor, vendor and operations. Family screens are bilingual; the provider and senior apps are Arabic by design.",
+    "problem": "The relative who pays can't see what happened at the visit. Payment has to work by card in euros from abroad and in Syrian pounds at the door, older users need a much simpler interface, and the product has to survive weak connections."
+  },
+  "roleDetail": {
+    "summary": "Sole engineer: architecture, backend, frontend, design system, DevOps and deployment. First commit to a live dedicated server in about five weeks.",
+    "items": [
+      "Django 5 and Django Ninja API: 186 paths and 214 operations with generated OpenAPI",
+      "PostgreSQL schema of 65 tables across 16 apps, with 43 hand-written migrations",
+      "Next.js 15 progressive web app with five role-scoped app shells and 70 routes",
+      "Real-time dispatch over Server-Sent Events and six scheduled Celery jobs",
+      "Dedicated VPS: nginx, systemd, certbot, nightly backups with a proven restore check",
+      "Mobile handoff pack: a Flutter specification, a Postman collection covering 184 of 184 endpoints, and user-journey documentation"
+    ]
+  },
+  "architecture": {
+    "diagram": "longage-system",
+    "image": "",
+    "caption": "One API, one database, a queue for the jobs that must run on time.",
+    "components": [
+      { "title": "Next.js PWA", "body": "Arabic by default with an English mirror, five role shells, and an IndexedDB queue that holds writes while offline." },
+      { "title": "Django + Django Ninja", "body": "Typed routers, generated OpenAPI, role-based access, idempotency keys and an audit trail on sensitive actions." },
+      { "title": "PostgreSQL", "body": "65 tables, range types and exclusion constraints, and a trigger that protects the financial ledger." },
+      { "title": "Redis + Celery", "body": "Cache, message broker and Server-Sent Events fan-out; six scheduled jobs for offers, reminders, reports, recurring visits, licence expiry and payouts." },
+      { "title": "Media storage", "body": "Identity documents encrypted with AES-GCM before they touch the disk; every file served through signed, scoped, expiring URLs." }
+    ]
+  },
+  "implementation": [
+    { "title": "APIs", "body": "Django 5.2 with Django Ninja typed routers and a generated OpenAPI document of 186 paths. Errors use problem+json. Malformed IDs return a 404 in the endpoint's own language instead of a 500." },
+    { "title": "Database", "body": "PostgreSQL with exclusion constraints, time ranges and btree_gist. Every schema change to the live database has been additive. IDs are UUIDv7." },
+    { "title": "Authentication", "body": "Phone number and one-time code, with codes hashed at rest. Short-lived access tokens and rotating single-use refresh tokens in an httpOnly cookie. A fresh code is required again for payout, phone-number and deactivation changes." },
+    { "title": "Real-time and jobs", "body": "Server-Sent Events on four scoped channels carry booking status, offers, visit reports and chat. Celery beat runs offer expiry every 60 seconds, medication reminders every 5 minutes and a weekly payout run." },
+    { "title": "Money", "body": "An append-only double-entry ledger: earnings, platform fee, travel and cash collected at the door, each as balanced lines. One module is the only writer." },
+    { "title": "Frontend", "body": "Next.js 15 App Router, React 19 and TypeScript. Tailwind CSS v4 bound to generated design tokens with no raw colour values in app code, four switchable palettes, Leaflet with OpenStreetMap for nearest-first results." },
+    { "title": "Security", "body": "Identity documents encrypted with AES-GCM and decryptable only through an audited operations endpoint. No public media URLs: every file is served through a signed, scoped, 24-hour link." },
+    { "title": "Infrastructure", "body": "A dedicated Ubuntu VPS with nginx on IPv4 and IPv6, four systemd units, Let's Encrypt, SSH keys only, ufw and fail2ban. Deploys abort if the test suite or the convention checks fail." }
+  ],
+  "decisions": [
+    {
+      "title": "Let PostgreSQL reject double bookings",
+      "context": "Two caregivers can accept the same time slot within the same millisecond.",
+      "decision": "An exclusion constraint over provider and time range for confirmed bookings, checked inside a select_for_update transaction. The loser gets a clean 409, and a test actually races it.",
+      "tradeoff": "Ties the design to PostgreSQL range types, which is a fair price for a guarantee the application can't break.",
+      "code": "ExclusionConstraint(\n    name=\"no_double_booking\",\n    expressions=[(\"provider\", RangeOperators.EQUAL),\n                 (\"slot\", RangeOperators.OVERLAPS)],\n    condition=Q(status__in=CONFIRMED_STATES),\n)",
+      "codeLang": "python"
+    },
+    {
+      "title": "An append-only ledger the application can't edit",
+      "context": "Money disputes are settled by records, not memory.",
+      "decision": "A database trigger blocks DELETE on ledger lines and allows UPDATE only to stamp a payout ID. Refunds and no-show settlements are new reversal lines.",
+      "tradeoff": "Corrections can never be quiet edits. Reports sum lines instead of reading a balance field."
+    },
+    {
+      "title": "One door for every status change",
+      "context": "A booking has 13 statuses, and operations staff sometimes need to move a stuck booking by hand.",
+      "decision": "Status changes only go through one transition() function checked against an explicit map of allowed moves. Each move writes an append-only event with actor and reason. A direct status write fails the deploy check.",
+      "tradeoff": "More ceremony for every change. It is also what makes the operations override safe: staff can only walk moves the machine already allows.",
+      "code": "draft → requested → offered → confirmed → en_route → arrived\n      → in_progress → completed → reported → rated\nterminal: rated · cancelled · no_show · incident · closed_no_report",
+      "codeLang": "text"
+    },
+    {
+      "title": "Idempotency keys as infrastructure",
+      "context": "Offline writes replay hours later on bad connections.",
+      "decision": "Bookings, offer acceptance and payments require an Idempotency-Key. A replay returns the original response; a reused key with a different body is rejected. The offline queue replays with the original keys.",
+      "tradeoff": "Bookings and payments are deliberately online-only, because dispatch timers and money must not fire hours late."
+    },
+    {
+      "title": "No Docker, no object storage, no PostGIS, on purpose",
+      "context": "A pilot scoped to one city on one server.",
+      "decision": "systemd plus git pull for deploys, files behind Django's storage API, and the haversine formula for distance.",
+      "tradeoff": "Each can return later through configuration when the pilot grows past one city."
+    }
+  ],
+  "challenges": [
+    { "problem": "The specified 120-second window for caregivers to accept an offer was unlivable without push notifications.", "solution": "Made the window tunable by operations staff (now 30 minutes), with targeted offers held until an hour before the visit." },
+    { "problem": "A visit that finished without a report was a dead end in the workflow.", "solution": "An hourly job chases the caregiver, hands the visit to operations after 24 hours, and a new closed_no_report status requires a reason." },
+    { "problem": "Arabic-first layouts surfaced real bidirectional-text bugs: mirrored breadcrumb glyphs and time ranges rendering backwards.", "solution": "Logical CSS properties everywhere, isolated time ranges, and every timestamp rendered in Damascus time regardless of the device." },
+    { "problem": "The original shared server was compromised through SSH brute force.", "solution": "Harvested the data, provisioned a dedicated server from a written runbook, rotated every secret and re-encrypted identity documents under a new key. The site was back the same day with 61 of 61 verification checks passing." }
+  ],
+  "results": {
+    "status": "Live at 4longage.com as a pilot scoped to one city, running on seeded demonstration data. Card payments are simulated until a legal entity exists, and SMS delivery for login codes is not connected yet.",
+    "metrics": [
+      { "value": "186", "label": "API paths (214 operations)" },
+      { "value": "65", "label": "Database tables" },
+      { "value": "185/185", "label": "Tests passing" },
+      { "value": "~51.8k", "label": "Lines of code" },
+      { "value": "70", "label": "Frontend routes" },
+      { "value": "61/61", "label": "Deployment checks" }
+    ],
+    "notes": [
+      "The numbers above are counted from the repositories and the live API in September 2026.",
+      "Push notifications are built and configuration-gated; notifications currently use in-app messages and Server-Sent Events."
+    ]
+  },
+  "stack": [
+    { "group": "Backend", "items": ["Python 3.12", "Django 5.2", "Django Ninja", "Celery", "django-eventstream", "pytest"] },
+    { "group": "Data", "items": ["PostgreSQL", "Redis"] },
+    { "group": "Frontend", "items": ["Next.js 15", "React 19", "TypeScript", "Tailwind CSS v4", "next-intl", "Serwist PWA", "Leaflet"] },
+    { "group": "Infrastructure", "items": ["Ubuntu VPS", "nginx", "systemd", "gunicorn / uvicorn", "Let's Encrypt", "Sentry"] }
+  ],
+  "related": [],
+  "seo": {
+    "title": "4longAge · Elderly home-care platform",
+    "description": "Case study: a bilingual, Arabic-first home-care platform with database-enforced booking, an append-only ledger and offline-safe writes, built solo with Django and Next.js."
+  }
+}

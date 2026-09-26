@@ -1,0 +1,128 @@
+{
+  "slug": "ovacs",
+  "order": 1,
+  "featured": true,
+  "name": "OVACS",
+  "category": "Document management SaaS",
+  "summary": "A multi-tenant document platform where customer files stay in the customer's own Google Drive, while OVACS handles permissions, audit and collaboration.",
+  "oneLiner": "A multi-tenant document platform where your files stay in your own cloud.",
+  "status": "live",
+  "url": "https://ovacs.com",
+  "period": "2025 — Present",
+  "client": "Founder-led SaaS",
+  "role": "Backend, web frontend and architecture",
+  "tags": ["Django", "DRF", "React", "MySQL", "Google Drive API"],
+  "visual": {
+    "desktop": "",
+    "mobile": "",
+    "full": "",
+    "schematic": "ovacs-storage",
+    "mobileSchematic": ""
+  },
+  "overview": {
+    "what": "OVACS is a document archiving and task management platform. Teams organise clients, cases, sessions and documents, share them across organisations, and decide exactly who can open each file. It runs in English and Arabic, with a web app, an Android app and a superadmin control panel.",
+    "who": "It started with law firms and now serves any team with sensitive paperwork: legal practices, clinics, government offices, businesses and families. Each workspace picks its own vocabulary, so “Case / Client / Session” can become “Case / Patient / Appointment”, in either language.",
+    "problem": "Small organisations keep critical documents in cabinets, chat threads and personal drives. Nobody can find the 2019 contract, a junior associate ends up with the same access as a partner, and sharing three documents with an outside expert for a limited time is impossible to express. Enterprise document systems solve this at a price and complexity a five-person firm can't carry."
+  },
+  "roleDetail": {
+    "summary": "I designed and built the Django REST backend and the React web app, and owned the API contract for the Android app, which a separate Flutter developer built.",
+    "items": [
+      "System architecture and data model: 45 models behind about 197 API routes",
+      "Authorization, file clearance levels, audit logging and signed download URLs",
+      "Google Drive integration, the storage abstraction and the migration tooling",
+      "Subscriptions, the Stripe integration and a mock payment gateway",
+      "Took over the web frontend mid-project and rebuilt it: 74 pages, a design system, English and Arabic with RTL, dark mode",
+      "Deployment on a Linux VPS with Nginx, Gunicorn, TLS and cron-driven lifecycle jobs",
+      "A risk-ordered API handoff guide and Postman collections for the mobile developer"
+    ]
+  },
+  "architecture": {
+    "diagram": "ovacs-system",
+    "image": "",
+    "caption": "Every request passes the same chain before a single byte of a file moves.",
+    "components": [
+      { "title": "Clients", "body": "React web app, Flutter Android app and a superadmin panel, all on the same JWT-authenticated API. An optional owner_account_id parameter selects which organisation's workspace a request acts in." },
+      { "title": "Nginx", "body": "TLS, HSTS and security headers, plus a dedicated location for secure file streaming with proxy buffering turned off." },
+      { "title": "Django REST Framework", "body": "About 197 routes behind one response envelope. Requests pass authentication, a workspace-connection check, the per-case role, file clearance and the subscription gate." },
+      { "title": "Storage factory", "body": "Resolves which backend holds a file: the customer's Google Drive, local disk or Cloudflare R2." },
+      { "title": "Services", "body": "MySQL for the 45 models, Stripe for billing, Firebase Cloud Messaging for mobile push, Google Drive API for customer storage." }
+    ]
+  },
+  "implementation": [
+    { "title": "APIs", "body": "Django 4.2 and Django REST Framework. Every endpoint returns the same envelope ({ type, code, message, data }) with consistent pagination. Workspace switching is a query parameter verified against an accepted connection, so any endpoint stays testable in a browser or Postman." },
+    { "title": "Authorization", "body": "Five roles (Owner, Admin, Diamond, Gold, Silver) resolved per case, crossed with three clearance levels on every file (red, yellow, green). Both matrices are editable at runtime by a superadmin and served to the frontend, so the interface and the API can't disagree." },
+    { "title": "Storage", "body": "A provider-agnostic storage interface with Google Drive, local disk and Cloudflare R2 as live backends. Drive connects through OAuth 2.0 with the narrow drive.file scope; refresh tokens are encrypted at rest with Fernet and support key rotation. Files are always proxied through OVACS, so every byte passes the permission check and the audit log." },
+    { "title": "Real-time", "body": "Server-Sent Events for the open web app, with bounded per-user, per-workspace queues, and Firebase Cloud Messaging for mobile push. One notification model covers 38 event types." },
+    { "title": "Billing", "body": "A subscription state machine (trial, active, past due, blocked, cancelled) behind a central gate layer. Stripe Checkout, the billing portal and signed webhooks are implemented; a mock gateway runs the full lifecycle without real money." },
+    { "title": "Frontend", "body": "React 18 with Vite, TanStack Query, React Hook Form and Zod. 23 hand-built UI primitives on a semantic token layer, 1,006 interface strings in English and Arabic across 28 namespaces, full RTL and dark mode." },
+    { "title": "Compliance", "body": "An audit log of every document access (user, action, clearance, resolved role, IP) and a self-service GDPR export that packages a workspace's data as an expiring ZIP download." },
+    { "title": "Infrastructure", "body": "Linux VPS with Nginx, Gunicorn and Let's Encrypt. Risky features ship dark behind a kill switch and a per-account allowlist before general availability." }
+  ],
+  "decisions": [
+    {
+      "title": "Keep customer files in the customer's own Google Drive",
+      "context": "Storage is the largest variable cost in a document SaaS, and “where exactly are my files?” is the first trust question customers ask.",
+      "decision": "One storage interface with two resolvers. New uploads go to the workspace's active provider; reads always follow the provider recorded on each file.",
+      "tradeoff": "Every byte is proxied through OVACS so the permission check and audit log still apply. In return, connecting Drive never breaks existing files, migration is optional, and a flat yearly price became viable.",
+      "code": "get_storage_backend_for_upload(account)     # → the workspace's active provider\nget_storage_backend_for_document(document)  # → the file's own recorded provider",
+      "codeLang": "python"
+    },
+    {
+      "title": "Re-check access while a file streams",
+      "context": "A permission check at request time is useless for a download that takes minutes. Revoking someone's role should stop the file, not just the next request.",
+      "decision": "Stream files in 1 MB chunks and re-run the case role and clearance checks every ten chunks.",
+      "tradeoff": "It only works with response buffering turned off in both Gunicorn and Nginx, so the feature is an infrastructure decision as much as a code one.",
+      "code": "[AUDIT] Streaming access revoked mid-transfer\nUser: 35, Document: 74, Chunk: 45\nBytes sent: 47185920/100663296\nReason: Role downgraded during streaming",
+      "codeLang": "text"
+    },
+    {
+      "title": "Answer “why can't I upload?” from the server",
+      "context": "Trial state, Drive connection, quota and block policy all affect whether an action is allowed. Returning a bare 403 forces the client to guess why.",
+      "decision": "Gated endpoints return HTTP 402 with a decision object the client renders directly: a machine-readable reason, a translated message, and the action that fixes it.",
+      "tradeoff": "More structure in every gated response. Adding a new gate reason needs no frontend change.",
+      "code": "{\n  \"allowed\": false,\n  \"reason\": \"trial_expired\",\n  \"hint_action\": \"subscribe\",\n  \"cta_url\": \"/profile?tab=subscription\",\n  \"severity\": \"error\"\n}",
+      "codeLang": "json"
+    },
+    {
+      "title": "Keep both pricing models behind one constant",
+      "context": "OVACS moved from Free/Pro/Business tiers to a single Drive-first yearly plan after a unit-economics study.",
+      "decision": "Both models stay fully implemented behind one PRICING_MODEL constant. Switching needs a reviewed deploy, never an admin click.",
+      "tradeoff": "Two code paths to maintain, so a pricing decision made at a small customer count stays reversible."
+    }
+  ],
+  "challenges": [
+    { "problem": "Buffering silently defeated the streaming security. Nginx and Gunicorn received the whole file before the second permission check ran.", "solution": "A dedicated Nginx location with proxy buffering and gzip off for secure file routes, and response buffering disabled in Gunicorn." },
+    { "problem": "Moving existing files to Google Drive with a bulk migration would have been long, risky and hard to resume.", "solution": "Record the storage provider on every file and route reads by it. Migration became an optional forward-only tool with progress, pause and cancel." },
+    { "problem": "Adding Arabic and dark mode to a live product without disorienting existing users.", "solution": "Refactor styling into a semantic token layer first. Dark mode became one class on the root element, and text direction a context set before the first paint." },
+    { "problem": "A mobile developer returned after two months to the largest breaking change in the project.", "solution": "A 1,000-line catch-up guide ordered by risk, verified against the live code, stating plainly which gates were enforced and which were planned." },
+    { "problem": "What happens to customers' files if Google has a bad day?", "solution": "Three admin escape hatches (system-wide failover, per-workspace override, opt-in per-upload fallback), a connection health check, and a banner for files that can't be reached." }
+  ],
+  "results": {
+    "status": "Live at ovacs.com with public sign-up and in active development. Payments run through the mock gateway today; the Stripe path is implemented behind the same interface.",
+    "metrics": [
+      { "value": "~197", "label": "API routes" },
+      { "value": "45", "label": "Data models" },
+      { "value": "~79k", "label": "Lines of application code" },
+      { "value": "1,006", "label": "Interface strings, EN + AR" },
+      { "value": "38", "label": "Notification types" },
+      { "value": "3", "label": "Live storage backends" }
+    ],
+    "notes": [
+      "The Android app was built by a separate Flutter developer against this API.",
+      "OneDrive and Dropbox are reserved in the storage interface, not implemented."
+    ]
+  },
+  "stack": [
+    { "group": "Backend", "items": ["Python 3.11", "Django 4.2", "Django REST Framework", "SimpleJWT", "django-filter"] },
+    { "group": "Database", "items": ["MySQL 8"] },
+    { "group": "Frontend", "items": ["React 18", "Vite", "TanStack Query", "React Hook Form", "Zod", "Tailwind CSS", "i18next"] },
+    { "group": "Integrations", "items": ["Google Drive API", "OAuth 2.0", "Google Picker", "Stripe", "Firebase Cloud Messaging", "Cloudflare R2"] },
+    { "group": "Infrastructure", "items": ["Linux VPS", "Nginx", "Gunicorn", "Let's Encrypt", "GitLab"] },
+    { "group": "Mobile", "items": ["Flutter (built by a separate developer)"] }
+  ],
+  "related": [],
+  "seo": {
+    "title": "OVACS · Document management SaaS",
+    "description": "Case study: a multi-tenant document platform with per-file clearance, Google Drive storage and English/Arabic support, built with Django REST Framework and React."
+  }
+}

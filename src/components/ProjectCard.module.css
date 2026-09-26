@@ -1,0 +1,202 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 6px 6px 0 var(--red);
+  border-color: var(--ink);
+}
+
+.card:focus-within {
+  border-color: var(--ink);
+}
+
+.visual {
+  position: relative;
+  background-color: var(--panel);
+  background-image: linear-gradient(var(--grid-2) 1px, transparent 1px), linear-gradient(90deg, var(--grid-2) 1px, transparent 1px);
+  background-size: 24px 24px;
+  border-bottom: 1px solid var(--rule-2);
+  overflow: hidden;
+}
+
+.visualInner {
+  padding: clamp(18px, 3vw, 34px) clamp(14px, 2.6vw, 30px) clamp(10px, 1.8vw, 20px);
+}
+
+.visualTag {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  font: 600 9.5px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: color-mix(in srgb, var(--panel) 85%, transparent);
+  padding: 5px 7px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(20px, 2.4vw, 30px);
+  flex: 1;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.no {
+  font: 700 12px/1 var(--font-mono);
+  color: var(--red);
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.title {
+  margin: 4px 0 0;
+  font-size: clamp(26px, 2.5vw, 34px);
+  line-height: 1.04;
+  font-weight: 790;
+  font-variation-settings: 'wdth' 112;
+  letter-spacing: -0.015em;
+}
+
+.link {
+  text-decoration: none;
+}
+
+/* The heading link covers the whole card, so every part of it is clickable. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.card:has(.link:focus-visible) {
+  outline: 2px dashed var(--red);
+  outline-offset: 4px;
+}
+
+.category {
+  margin: -4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-variation-settings: 'wdth' 72;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+
+.summary {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 15.5px;
+  max-width: 58ch;
+}
+
+.cta {
+  align-self: flex-start;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* Wide card: text beside the visual */
+.wide {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+}
+
+.wide .visual {
+  order: 2;
+  border-bottom: 0;
+  border-left: 1px solid var(--rule-2);
+  display: flex;
+  align-items: center;
+}
+
+.wide .visualInner {
+  width: 100%;
+  padding: clamp(24px, 4vw, 56px) clamp(20px, 3.4vw, 48px);
+}
+
+.wide .body {
+  justify-content: center;
+  padding: clamp(24px, 3.4vw, 48px);
+}
+
+.wide .title {
+  font-size: clamp(34px, 3.6vw, 50px);
+}
+
+.wide .cta {
+  margin-top: 10px;
+}
+
+/* Tablet: every card becomes a wide row so screenshots stay large */
+@media (max-width: 1023px) {
+  .card {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .card .visual {
+    order: 2;
+    border-bottom: 0;
+    border-left: 1px solid var(--rule-2);
+    display: flex;
+    align-items: center;
+  }
+
+  .card .visualInner {
+    width: 100%;
+  }
+
+  .card .body {
+    justify-content: center;
+  }
+}
+
+/* Phone: stacked, visual first and full width */
+@media (max-width: 699px) {
+  .card,
+  .wide {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card .visual,
+  .wide .visual {
+    order: 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .card .visualInner,
+  .wide .visualInner {
+    padding: 22px 12px 36px;
+  }
+
+  .wide .title {
+    font-size: clamp(28px, 8vw, 34px);
+  }
+}

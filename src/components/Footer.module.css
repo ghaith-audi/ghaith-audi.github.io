@@ -1,0 +1,48 @@
+.footer {
+  background: var(--inverse-bg);
+  color: var(--inverse-ink-2);
+  border-top: 1px solid var(--inverse-rule);
+  padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px));
+}
+
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 28px;
+  font: 500 10.5px/1.5 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sig {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.sig b {
+  color: var(--inverse-ink);
+  font-weight: 600;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+
+.links a {
+  text-decoration: none;
+  padding: 6px 0;
+}
+
+.links a:hover {
+  color: var(--inverse-red);
+}
+
+.copy {
+  margin: 0;
+}

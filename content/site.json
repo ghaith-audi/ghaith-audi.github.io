@@ -1,0 +1,209 @@
+{
+  "name": "Ghaith Audi",
+  "firstName": "Ghaith",
+  "lastName": "Audi",
+  "roles": [
+    "Software engineer.",
+    "Full-stack developer.",
+    "Backend first."
+  ],
+  "tagline": "Building production web platforms, APIs, and business systems.",
+  "location": "Homs, Syria",
+  "timezone": "UTC+3",
+  "availability": "Open to remote roles and relocation",
+  "available": true,
+  "languages": "Arabic · English",
+  "email": "ghaith.kh.audi@gmail.com",
+  "linkedin": "https://www.linkedin.com/in/ghaith-audi-48626b214",
+  "github": "https://github.com/GhaithAudi",
+  "cv": "",
+  "portrait": "/images/portrait.webp",
+  "portraitAlt": "Portrait of Ghaith Audi in a navy suit and tie",
+  "heroFacts": [
+    {
+      "value": "9",
+      "label": "Systems shipped"
+    },
+    {
+      "value": "6",
+      "label": "Live in production"
+    },
+    {
+      "value": "UAE · KSA · Syria",
+      "label": "Client markets"
+    },
+    {
+      "value": "Arabic · English",
+      "label": "Both text directions"
+    }
+  ],
+  "work": {
+    "title": "Selected work",
+    "lead": "Nine systems I designed and built. Six are live on the public internet; three run as private deployments on client infrastructure."
+  },
+  "approach": {
+    "title": "How I build software",
+    "lead": "The same five steps on every system, from a clinic app to a pension engine.",
+    "steps": [
+      {
+        "title": "Understand",
+        "body": "Analyze requirements and business needs.",
+        "example": "Days on site with a pensions department before the first data model."
+      },
+      {
+        "title": "Architect",
+        "body": "Design maintainable systems and clear boundaries.",
+        "example": "One storage interface let OVACS move files to Google Drive without a migration."
+      },
+      {
+        "title": "Build",
+        "body": "Write clean, testable, production-ready software.",
+        "example": "185 passing tests gate every 4longAge deploy."
+      },
+      {
+        "title": "Deploy",
+        "body": "Make systems reliable and observable in production.",
+        "example": "Four sites on one VPS, each with its own process and database."
+      },
+      {
+        "title": "Improve",
+        "body": "Iterate based on real usage and feedback.",
+        "example": "SEO and analytics proven on the Saudi site first, then shipped to the flagship."
+      }
+    ]
+  },
+  "experience": {
+    "title": "Experience",
+    "lead": "Most of it without a senior engineer to hand the hard parts to.",
+    "items": [
+      {
+        "period": "Apr 2026 — Present",
+        "org": "Independent",
+        "role": "Full-stack software engineer, freelance",
+        "location": "Remote",
+        "bullets": [
+          "Continue developing OVACS for its founder: Google Drive storage, subscriptions, and full Arabic right-to-left support.",
+          "Build and maintain four sites on the AGS platform, including the Saudi site and its SEO and analytics stack.",
+          "Designed and built 4longAge alone, from database schema to production server."
+        ]
+      },
+      {
+        "period": "Jan 2024 — Apr 2026",
+        "org": "Hometecs",
+        "role": "Software engineer",
+        "location": "Homs, Syria",
+        "bullets": [
+          "Joined a two-month-old company with no senior engineers and owned each system end to end: requirements, data model, API, frontend and deployment.",
+          "Built Dentecs, the Nakaba Central pension platform, OVACS, Geofence & TRACKi and the first version of the AGS platform.",
+          "Gathered requirements on site with clients, including days with the Engineers Syndicate's pensions department."
+        ]
+      },
+      {
+        "period": "2024 — Present",
+        "org": "Syrian Virtual University",
+        "role": "MBA, part-time",
+        "location": "Online",
+        "bullets": [
+          "In progress, alongside full-time engineering work."
+        ]
+      },
+      {
+        "period": "2018 — 2023",
+        "org": "Al-Baath University",
+        "role": "B.E. Networking & Computer Systems",
+        "location": "Homs, Syria",
+        "bullets": [
+          "Taught myself Python from a downloaded course in third year.",
+          "Built a Flutter app as a fourth-year team project.",
+          "Graduation project: DIWAN, a Django document-archiving system for the university."
+        ]
+      }
+    ]
+  },
+  "stack": {
+    "title": "Technical stack",
+    "lead": "What the nine systems above actually run on.",
+    "groups": [
+      {
+        "group": "Backend",
+        "items": [
+          "Python",
+          "Django",
+          "Django REST Framework",
+          "FastAPI",
+          "Celery",
+          "Redis"
+        ]
+      },
+      {
+        "group": "Frontend",
+        "items": [
+          "React",
+          "Next.js",
+          "TypeScript",
+          "Tailwind CSS"
+        ]
+      },
+      {
+        "group": "Mobile",
+        "items": [
+          "Flutter"
+        ]
+      },
+      {
+        "group": "Databases",
+        "items": [
+          "PostgreSQL",
+          "MySQL",
+          "MongoDB",
+          "Oracle"
+        ]
+      },
+      {
+        "group": "Infrastructure",
+        "items": [
+          "Linux",
+          "VPS",
+          "Nginx",
+          "Docker",
+          "Git"
+        ]
+      },
+      {
+        "group": "Integrations",
+        "items": [
+          "Google Drive API",
+          "Stripe",
+          "Firebase Cloud Messaging",
+          "GA4 & Search Console"
+        ]
+      }
+    ]
+  },
+  "contact": {
+    "eyebrow": "Contact",
+    "title": "Have a system to build?",
+    "body": "Let's build something useful.",
+    "button": "Let's talk",
+    "note": "Open to remote roles and relocation. I work in Arabic and English from UTC+3, which overlaps with the Gulf and most of Europe."
+  },
+  "footer": {
+    "note": "Drawn in Homs, Syria"
+  },
+  "seo": {
+    "title": "Ghaith Audi · Software engineer, backend first",
+    "description": "Ghaith Audi is a backend-first full-stack software engineer in Homs, Syria. Nine production systems: SaaS platforms, commerce sites, GPS tracking and enterprise integrations built with Django and Next.js.",
+    "keywords": [
+      "Ghaith Audi",
+      "software engineer",
+      "backend developer",
+      "full-stack developer",
+      "Django",
+      "Next.js",
+      "Python",
+      "React",
+      "Syria",
+      "remote"
+    ]
+  }
+}

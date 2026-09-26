@@ -1,0 +1,239 @@
+{
+  "slug": "ags-international",
+  "order": 5,
+  "featured": false,
+  "name": "AGS International",
+  "category": "Solar commerce platform & CMS",
+  "summary": "A bilingual storefront and CMS for a UAE solar distributor: multi-country pricing, Stripe and quotation checkout, and an admin that controls every word on the site.",
+  "oneLiner": "Storefront, catalogue and CMS for a UAE solar-energy distributor, and the flagship of a four-site platform.",
+  "status": "live",
+  "url": "https://ags.ac",
+  "period": "2026 — Present",
+  "client": "AGS International General Trading L.L.C · Dubai",
+  "role": "Full-stack developer",
+  "tags": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "MongoDB",
+    "Stripe"
+  ],
+  "visual": {
+    "desktop": "/projects/ags-international/desktop.webp",
+    "mobile": "/projects/ags-international/mobile.webp",
+    "full": "/projects/ags-international/full.webp",
+    "schematic": "",
+    "mobileSchematic": ""
+  },
+  "overview": {
+    "what": "A marketing site, product catalogue, storefront and content management system in one Next.js application, in English and Arabic with full right-to-left layout. The same codebase later became the platform behind three more sites.",
+    "who": "AGS International distributes solar panels, inverters and batteries across the UAE, Saudi Arabia and export markets. The site serves buyers and the sales team, and is run day to day by the client's non-technical staff.",
+    "problem": "A full rebuild, with one hard constraint: the MongoDB database was still being read and written by the client's legacy Express.js site in production, so no existing schema could change."
+  },
+  "roleDetail": {
+    "summary": "Full-stack developer, building from a UI/UX designer's Figma designs.",
+    "items": [
+      "Next.js 16 App Router application: 92 routes, 82 API route handlers, 36 Mongoose models",
+      "A 65-route admin dashboard with section toggles, a media library and guided product forms",
+      "Multi-country commerce: currency, tax, delivery and payment methods resolved per country",
+      "Checkout with Stripe, a quotation flow feeding a sales pipeline, and Twilio Verify phone codes",
+      "Technical SEO, structured data, GA4 analytics and an SEO dashboard built on Google APIs",
+      "Deployment on a self-managed VPS, plus a 1,947-line admin guide for the client's staff"
+    ]
+  },
+  "architecture": {
+    "diagram": "ags-platform",
+    "image": "",
+    "caption": "One brand-agnostic core, four deployments. ags.ac is the origin.",
+    "components": [
+      {
+        "title": "Platform core",
+        "body": "Everything brand-specific lives outside the code: environment variables for domains and keys, one @theme block of about 40 design tokens, and the database for logos, menus, copy, countries and payment methods."
+      },
+      {
+        "title": "Next.js application",
+        "body": "Server Components by default, route handlers for the API, server actions for the admin, and a custom image loader for pre-optimised uploads."
+      },
+      {
+        "title": "MongoDB",
+        "body": "36 Mongoose models: commerce, 14 page-content models, editorial content and operations."
+      },
+      {
+        "title": "Deployment",
+        "body": "Each site runs as its own PM2 app with its own database, behind Nginx with Let's Encrypt, on one VPS."
+      }
+    ]
+  },
+  "implementation": [
+    {
+      "title": "Rendering",
+      "body": "Roughly 70% of files are Server Components. React cache() deduplicates queries across 22 of 37 data modules, and the Mongoose connection is cached globally so hot reloads and the App Router don't exhaust the pool."
+    },
+    {
+      "title": "Bilingual routing",
+      "body": "next-intl with an as-needed prefix: English at /products, Arabic at /ar/products, self-referencing canonicals and hreflang. Layouts use logical CSS properties throughout."
+    },
+    {
+      "title": "Commerce",
+      "body": "A Country model drives currency, exchange rate, margin, tax, delivery fee and the payment methods shown at checkout. Prices resolve in layers, and the cart re-syncs prices on the server so a stale cart can't check out at yesterday's price."
+    },
+    {
+      "title": "Content management",
+      "body": "Nothing on the public site is hard-coded copy. 14 page-content models, TipTap rich text, 31 typed feature flags, a Sharp-backed media library, an unsaved-changes guard, and a guided product form whose errors link to the tab that needs fixing."
+    },
+    {
+      "title": "SEO",
+      "body": "Per-page, per-language metadata the client can edit, a database-driven bilingual sitemap, nine Schema.org types, llms.txt and IndexNow, and 14 AI crawlers explicitly allowed."
+    },
+    {
+      "title": "Analytics",
+      "body": "GA4 with consent mode and correct page views for client-side navigation, e-commerce events, and an SEO dashboard inside the admin built on the GA4 Data, Search Console and PageSpeed Insights APIs, with a TTL-indexed cache for quota-limited calls."
+    },
+    {
+      "title": "Auth and validation",
+      "body": "NextAuth v5 (beta) with bcrypt and role-based admin access; Zod validation on every form and server action."
+    }
+  ],
+  "decisions": [
+    {
+      "title": "Brand-agnostic, not multi-tenant",
+      "context": "The client's sister brands needed their own sites, and the database was shared with a live legacy site.",
+      "decision": "Push every brand-specific value into environment, design tokens and data, then fork per brand instead of adding tenancy.",
+      "tradeoff": "Shared fixes are cherry-picked or replayed rather than propagated automatically. In return: complete freedom per market and zero tenant-isolation risk on a shared production database."
+    },
+    {
+      "title": "Additive-only schema changes",
+      "context": "The legacy Express.js site kept reading the same collections.",
+      "decision": "New models beside old ones, sibling fields for Arabic content, and a category field that accepts both the old and the new document shape.",
+      "tradeoff": "The schema carries legacy fields for a while. Nothing reading the old shape ever broke."
+    },
+    {
+      "title": "Cart and checkout: noindex, never a robots disallow",
+      "context": "Private pages shouldn't appear in search results.",
+      "decision": "Exclude cart and checkout with a noindex meta tag only. Admin, API and the customer portal are disallowed outright.",
+      "tradeoff": "Disallowing cart and checkout in robots.txt would stop Google from ever crawling them, so it could never see the noindex."
+    },
+    {
+      "title": "One source of truth for analytics",
+      "context": "The client didn't trust the numbers because the admin dashboard and Google disagreed.",
+      "decision": "GA4 became the single source of truth. Team and admin activity is excluded, conversion windows are aligned, and the first-party tracker was paused where GA4 was authoritative.",
+      "tradeoff": "Deleting a feature I had built, because a second conflicting number is worse than none."
+    }
+  ],
+  "challenges": [
+    {
+      "problem": "Uploaded images returned 400 errors from Next.js's image optimiser.",
+      "solution": "Uploads are already converted to WebP by Sharp when they arrive, so a custom image loader serves them straight from Nginx and bypasses the optimiser; everything else still goes through it."
+    },
+    {
+      "problem": "Production builds ran out of memory on the shared VPS.",
+      "solution": "Type-checking runs separately with tsc instead of inside the build, and a standing rule never to build two apps at once."
+    },
+    {
+      "problem": "A whole batch of Arabic translations disappeared without an error.",
+      "solution": "Two top-level “common” blocks in one catalogue meant the second silently replaced the first. Merged, and checked for on both sites."
+    },
+    {
+      "problem": "Converted prices drifted after exchange-rate changes.",
+      "solution": "Froze the converted price per product so a displayed price only changes when someone changes it."
+    }
+  ],
+  "results": {
+    "status": "Live at ags.ac and operated day to day by the client's own staff.",
+    "metrics": [
+      {
+        "value": "56.6k",
+        "label": "Lines of TypeScript"
+      },
+      {
+        "value": "92",
+        "label": "Routes"
+      },
+      {
+        "value": "82",
+        "label": "API endpoints"
+      },
+      {
+        "value": "36",
+        "label": "Mongoose models"
+      },
+      {
+        "value": "65",
+        "label": "Admin routes"
+      },
+      {
+        "value": "9",
+        "label": "Schema.org types"
+      }
+    ],
+    "notes": [
+      "Figures such as containers shipped or clients served on the site are the client's own business statements, not engineering metrics.",
+      "The repository is private; the live site is the public artefact."
+    ]
+  },
+  "stack": [
+    {
+      "group": "Framework",
+      "items": [
+        "Next.js 16",
+        "React 19",
+        "TypeScript"
+      ]
+    },
+    {
+      "group": "Data",
+      "items": [
+        "MongoDB",
+        "Mongoose 9"
+      ]
+    },
+    {
+      "group": "UI",
+      "items": [
+        "Tailwind CSS 4",
+        "Framer Motion",
+        "TipTap",
+        "Recharts"
+      ]
+    },
+    {
+      "group": "Commerce and auth",
+      "items": [
+        "Stripe",
+        "Twilio Verify",
+        "NextAuth v5 (beta)",
+        "Zod"
+      ]
+    },
+    {
+      "group": "SEO and analytics",
+      "items": [
+        "next-intl",
+        "GA4",
+        "Search Console API",
+        "PageSpeed Insights API",
+        "Schema.org"
+      ]
+    },
+    {
+      "group": "Infrastructure",
+      "items": [
+        "Linux VPS",
+        "Nginx",
+        "PM2",
+        "Let's Encrypt",
+        "Sharp",
+        "GitLab"
+      ]
+    }
+  ],
+  "related": [
+    "ags-international-ksa",
+    "darlux",
+    "hmc-international"
+  ],
+  "seo": {
+    "title": "AGS International · Solar commerce platform",
+    "description": "Case study: a bilingual Next.js storefront and CMS with multi-country pricing, Stripe and quotation checkout, technical SEO and GA4 analytics."
+  }
+}

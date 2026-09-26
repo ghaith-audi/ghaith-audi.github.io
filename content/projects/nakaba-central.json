@@ -1,0 +1,208 @@
+{
+  "slug": "nakaba-central",
+  "order": 4,
+  "featured": false,
+  "name": "Nakaba Central",
+  "category": "Pension platform over legacy Oracle",
+  "summary": "A modern API and Arabic dashboard over the Syrian Engineers Syndicate's existing Oracle database: 673 legacy tables integrated, none migrated.",
+  "oneLiner": "A modern web layer over a 680-table Oracle schema that had to keep running.",
+  "status": "private",
+  "url": "",
+  "period": "2024",
+  "client": "Syrian Engineers Syndicate",
+  "role": "Backend, calculation engines and dashboard",
+  "tags": [
+    "Django",
+    "DRF",
+    "Oracle",
+    "React"
+  ],
+  "visual": {
+    "desktop": "",
+    "mobile": "",
+    "full": "",
+    "schematic": "nakaba-calc",
+    "mobileSchematic": ""
+  },
+  "overview": {
+    "what": "Nakaba Central puts a secure REST API and an Arabic web dashboard in front of the Syrian Engineers Syndicate's enterprise Oracle database. It covers engineer records, membership, pension-yield calculations, appeals and fix requests.",
+    "who": "Engineers using a self-service portal, and the syndicate's staff and administrators. The interface is Arabic-first, right-to-left, with dark mode.",
+    "problem": "The syndicate registers engineers, collects subscriptions and runs a pension fund on an Oracle database built over many years, with desktop tools still writing to it. The brief was to modernise the front without migrating the data, without breaking those tools, and without losing a day of operations."
+  },
+  "roleDetail": {
+    "summary": "I gathered the requirements, then built the backend, the calculation engines, the dashboard and the deployment guides.",
+    "items": [
+      "Spent days with the retirement-fund department mapping the rules, then worked from the legislation for each year",
+      "Generated Django models from the Oracle schema with Python scripts, then corrected them by hand: 686 classes in a 15,086-line models file",
+      "Five pension-yield calculation engines plus bulk processing",
+      "JWT authentication, group-based permissions and Swagger documentation with worked examples",
+      "React dashboard in Arabic with right-to-left layout and dark mode",
+      "Batch migration of member accounts into Django authentication, and five deployment guides"
+    ]
+  },
+  "architecture": {
+    "diagram": "nakaba-tiers",
+    "image": "",
+    "caption": "Three tiers over a schema the application does not own.",
+    "components": [
+      {
+        "title": "React dashboard",
+        "body": "Arabic, right-to-left, dark mode; 13 protected routes; navigation rendered from the server's permission answer."
+      },
+      {
+        "title": "Django REST Framework",
+        "body": "686 ORM models, the calculation engines and the permission classes. Not a single raw SQL query."
+      },
+      {
+        "title": "Oracle database",
+        "body": "The syndicate's existing schema: 682 tables across 24 modules, from pensions and accounting to health insurance and the library. Django owns only 9 of them."
+      },
+      {
+        "title": "Legacy desktop tools",
+        "body": "Still read and write the same tables, which is why the schema could never be changed."
+      }
+    ]
+  },
+  "implementation": [
+    {
+      "title": "Legacy integration",
+      "body": "673 of the 686 models are declared managed = False with an explicit db_table. Django may read and write those tables but can never create, alter or drop them, so migrate can't touch the schema."
+    },
+    {
+      "title": "Calculation engines",
+      "body": "Each engine expands a work period into months, derives the engineer's “engineering age” since graduation, looks up the legal minimum for that year and age, compares the declared 6% contributions, and adds an 8% yearly late penalty on any shortfall. Separate engines cover private offices, employees, the private sector, work abroad and military service."
+    },
+    {
+      "title": "Self-explaining output",
+      "body": "Ten Arabic explanation templates return the derivation with every figure, step by step, so a member can follow exactly how an amount due was reached."
+    },
+    {
+      "title": "API and access",
+      "body": "Django REST Framework generic views with SimpleJWT, six permission classes on a shared group-based base class, a permissions endpoint the frontend renders from, and hand-written Swagger schemas with real example payloads."
+    },
+    {
+      "title": "Account migration",
+      "body": "Scripts that bulk-create Django accounts from the legacy engineer table in batches of 500, re-hashing credentials with PBKDF2. A single engID field on the custom user bridges Django and the legacy records."
+    },
+    {
+      "title": "Frontend",
+      "body": "React 18 with Redux Toolkit, React Query, Ant Design and Tailwind, right-to-left through Tailwind's rtl and ltr variants, validated multi-section forms, and a printable fix-request sheet for the paper process."
+    }
+  ],
+  "decisions": [
+    {
+      "title": "Integrate with the legacy schema instead of migrating it",
+      "context": "Hundreds of tables of member data, desktop tools still writing to them, and no room for downtime.",
+      "decision": "Point Django's ORM at the existing tables with managed = False and never let it own their structure.",
+      "tradeoff": "No migrations to lean on: column types, nullability and composite keys had to match Oracle by hand across 673 classes. In return, no cut-over, no data export, no risk to the tools already in use.",
+      "code": "class Meta:\n    managed = False\n    db_table = 'h_architects_prsn'",
+      "codeLang": "python"
+    },
+    {
+      "title": "Make every figure explain itself, in Arabic",
+      "context": "A member told they owe money will dispute the number at the counter.",
+      "decision": "Return a plain-Arabic derivation with every calculated figure, one template per outcome.",
+      "tradeoff": "More output per calculation. A number with its own derivation ends the argument instead of starting it.",
+      "code": "مجموع التوريدات لسنة {year} (كَ 6%) : {year_income}\nالحد الأدنى في ذلك العام ({year}) للعمر الهندسي {eng_age} : {that_year_minimum}\nالعائدات المطلوبة = الفرق + الغرامة : {required_amount}",
+      "codeLang": "arabic"
+    },
+    {
+      "title": "ORM only, zero raw SQL",
+      "context": "It's tempting to drop to SQL when a schema is unfamiliar.",
+      "decision": "Every one of the 680+ tables is reached through the ORM.",
+      "tradeoff": "More modelling work up front, and a data layer that stays reviewable and portable even though the schema isn't."
+    }
+  ],
+  "challenges": [
+    {
+      "problem": "The pension rules were spread across years of legislation and the knowledge of one department.",
+      "solution": "On-site sessions with the department, written notes per year, and five minimums tables that encode the legal thresholds for each career track."
+    },
+    {
+      "problem": "A generated schema of 686 classes with composite and non-standard keys.",
+      "solution": "Generated the models with Python scripts, then corrected types, nullability and keys by hand against the live schema."
+    },
+    {
+      "problem": "Moving the whole membership into Django authentication without touching the legacy table.",
+      "solution": "A batch migration that checks the source table exists, reads 500 rows at a time and re-hashes credentials with Django's password hasher."
+    }
+  ],
+  "results": {
+    "status": "Delivered as a private deployment for the syndicate and reviewed with its pensions department in on-site sessions and online meetings. There is no public instance.",
+    "metrics": [
+      {
+        "value": "686",
+        "label": "ORM models"
+      },
+      {
+        "value": "673",
+        "label": "Legacy tables, unmanaged"
+      },
+      {
+        "value": "0",
+        "label": "Raw SQL queries"
+      },
+      {
+        "value": "5",
+        "label": "Calculation engines"
+      },
+      {
+        "value": "10",
+        "label": "Arabic explanation templates"
+      },
+      {
+        "value": "~32.8k",
+        "label": "Lines of code"
+      }
+    ],
+    "notes": [
+      "The schema predates the project; the work here is integrating with it, not designing it.",
+      "Screenshots are captured against test records only."
+    ]
+  },
+  "stack": [
+    {
+      "group": "Backend",
+      "items": [
+        "Python",
+        "Django 4.2",
+        "Django REST Framework",
+        "SimpleJWT",
+        "drf-yasg"
+      ]
+    },
+    {
+      "group": "Database",
+      "items": [
+        "Oracle Database (existing schema)",
+        "Oracle Instant Client"
+      ]
+    },
+    {
+      "group": "Frontend",
+      "items": [
+        "React 18",
+        "Redux Toolkit",
+        "React Query",
+        "Ant Design",
+        "Tailwind CSS",
+        "React Hook Form",
+        "Zod"
+      ]
+    },
+    {
+      "group": "Infrastructure",
+      "items": [
+        "Ubuntu",
+        "nginx",
+        "gunicorn",
+        "systemd"
+      ]
+    }
+  ],
+  "related": [],
+  "seo": {
+    "title": "Nakaba Central · Pension platform over legacy Oracle",
+    "description": "Case study: a Django REST API and Arabic React dashboard over a 682-table Oracle schema, with five pension engines that explain every figure in Arabic."
+  }
+}

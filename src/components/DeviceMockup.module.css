@@ -1,0 +1,148 @@
+/* All sizes are in container-query units so the devices scale as one drawing. */
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 100 / 64;
+  container-type: inline-size;
+}
+
+.laptop {
+  position: absolute;
+  left: 4cqw;
+  top: 4cqw;
+  width: 76cqw;
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.solo .laptop {
+  left: 9cqw;
+  width: 82cqw;
+}
+
+.lid {
+  position: relative;
+  background: var(--device);
+  border-radius: 1.8cqw 1.8cqw 0.4cqw 0.4cqw;
+  padding: 1.5cqw 1.5cqw 2cqw;
+  box-shadow: 0 0 0 1px var(--device-edge), var(--shadow);
+}
+
+.camera {
+  position: absolute;
+  top: 0.55cqw;
+  left: 50%;
+  width: 0.5cqw;
+  height: 0.5cqw;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--device-2);
+}
+
+.screen {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 0.3cqw;
+  background: var(--sheet);
+}
+
+.screen img,
+.phoneScreen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.base {
+  position: relative;
+  height: 1.7cqw;
+  width: calc(100% + 12cqw);
+  margin-left: -6cqw;
+  background: linear-gradient(var(--device-2), var(--device));
+  border-radius: 0 0 1.6cqw 1.6cqw / 0 0 1.2cqw 1.2cqw;
+  box-shadow: 0 0 0 1px var(--device-edge);
+}
+
+.base::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 13cqw;
+  height: 0.7cqw;
+  transform: translateX(-50%);
+  border-radius: 0 0 0.8cqw 0.8cqw;
+  background: color-mix(in srgb, var(--device-2) 60%, #8aa1b5);
+  opacity: 0.55;
+}
+
+.phone {
+  position: absolute;
+  right: 4cqw;
+  bottom: 3cqw;
+  width: 19cqw;
+  aspect-ratio: 9 / 19.5;
+  padding: 0.85cqw;
+  border-radius: 3cqw;
+  background: var(--device);
+  box-shadow: 0 0 0 1px var(--device-edge), var(--shadow);
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.notch {
+  position: absolute;
+  z-index: 1;
+  top: 1.6cqw;
+  left: 50%;
+  width: 5.2cqw;
+  height: 1.3cqw;
+  border-radius: 1cqw;
+  transform: translateX(-50%);
+  background: var(--device);
+}
+
+.phoneScreen {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 2.3cqw;
+  background: var(--sheet);
+}
+
+.schematic {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background-color: var(--sheet);
+  background-image: linear-gradient(var(--grid-2) 1px, transparent 1px), linear-gradient(90deg, var(--grid-2) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.schematic svg {
+  width: 100%;
+  height: 100%;
+}
+
+.blank {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--panel);
+  font: 700 3cqw/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Hover lift, triggered from the project card */
+:global(.device-hover):hover .laptop {
+  transform: translateY(-0.8cqw);
+}
+
+:global(.device-hover):hover .phone {
+  transform: translateY(-1.6cqw);
+}

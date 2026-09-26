@@ -1,0 +1,97 @@
+{
+  "slug": "hmc-international",
+  "order": 8,
+  "featured": false,
+  "name": "HMC International Trading",
+  "category": "CMS-driven corporate site, Dubai",
+  "summary": "A single-page corporate site where every section is one editable document, with a complete storefront already built behind it.",
+  "oneLiner": "A corporate site today and a storefront when the client is ready, without a rebuild.",
+  "status": "live",
+  "url": "https://hmcfz.co",
+  "period": "Mar — May 2026",
+  "client": "HMC International Trading FZCO · Dubai",
+  "role": "Full-stack developer",
+  "tags": ["Next.js", "TypeScript", "MongoDB", "Headless CMS", "SVG animation"],
+  "visual": {
+    "desktop": "/projects/hmc-international/desktop.webp",
+    "mobile": "/projects/hmc-international/mobile.webp",
+    "full": "/projects/hmc-international/full.webp",
+    "schematic": "",
+    "mobileSchematic": ""
+  },
+  "overview": {
+    "what": "The corporate website of HMC International Trading, a Dubai import and export company that also supplies solar panels, batteries and inverters. It presents what the company does, its products, its global presence and its partners.",
+    "who": "Trade partners and buyers looking for a reliable import and export operator.",
+    "problem": "HMC needed a corporate presence quickly, with room to grow into e-commerce later, and wanted to change its own page without calling a developer."
+  },
+  "roleDetail": {
+    "summary": "Full-stack developer: I ran the full AGS platform and replaced only its homepage and layout.",
+    "items": [
+      "Modelled the whole landing page as one editable database document",
+      "An animated SVG world map and an interactive footprint map for Global Presence",
+      "Kept the platform's 83 routes, storefront and admin dormant behind the visible page",
+      "Brand colours and logo sizes editable from the admin panel"
+    ]
+  },
+  "architecture": {
+    "diagram": "hmc-dormant",
+    "image": "",
+    "caption": "One visible page, one document behind it, a whole platform waiting underneath.",
+    "components": [
+      { "title": "Landing document", "body": "HmcLandingContent: branding, menu, hero, about, what we do, products, global presence, partners, contact, footer, SEO fields and brand colours, in a 229-line schema." },
+      { "title": "Visible page", "body": "A single-page site rendered entirely from that document." },
+      { "title": "Dormant platform", "body": "Storefront, cart, checkout, blog, careers and the full admin dashboard, still working behind the page. Switching them on means swapping two files." }
+    ]
+  },
+  "implementation": [
+    { "title": "Content management", "body": "Every section, image and link on the page comes from one Mongoose document the client edits in the admin panel, including the primary, secondary and accent brand colours and the navbar and footer logo heights." },
+    { "title": "Interactive graphics", "body": "An animated SVG world map for the Global Presence section and an interactive footprint map whose filter pills hide when only one location type exists." },
+    { "title": "Build hygiene", "body": "Types and defaults extracted to a client-safe module so Mongoose never reaches the browser bundle." },
+    { "title": "Language", "body": "English only at launch, at the client's choice. The internationalisation layer is still in place." }
+  ],
+  "decisions": [
+    {
+      "title": "Swap the homepage, keep the platform",
+      "context": "A throwaway landing page would have to be rebuilt the day HMC wanted a store.",
+      "decision": "Replace only the homepage and layout, keep the originals beside them as documented backups, and write the revert steps at the top of the live file.",
+      "tradeoff": "A larger deployment than a static landing page needs, and a storefront that is one swap away instead of a new project.",
+      "code": "// HMC TEMPORARY MODE — Home page\n// Renders the HMC International Trading FZCO single-page landing site.\n// All content is admin-managed via /admin/hmc-landing.\n//\n// To revert to the AGS home: copy the body of ./_page-ags-backup.tsx into\n// this file (and revert ./layout.tsx similarly from ./_layout-ags-backup.tsx).",
+      "codeLang": "ts"
+    },
+    {
+      "title": "Brand colours in the database, not the stylesheet",
+      "context": "The other three sites set colours in design tokens at build time.",
+      "decision": "Store HMC's colours on the landing document so the client can re-theme the site from the admin.",
+      "tradeoff": "The most configurable of the four builds, at the cost of a little runtime styling."
+    }
+  ],
+  "challenges": [
+    { "problem": "Mongoose was leaking into the client bundle through shared types.", "solution": "Moved types and defaults into a client-safe module that imports nothing from the server." },
+    { "problem": "Partner logos arrive in every shape and size.", "solution": "Logo upload in the admin with a configurable display size." }
+  ],
+  "results": {
+    "status": "Live at hmcfz.co in English. The storefront is built and dormant, ready to switch on.",
+    "metrics": [
+      { "value": "52.4k", "label": "Lines of TypeScript" },
+      { "value": "83", "label": "Routes, mostly dormant" },
+      { "value": "63", "label": "API endpoints" },
+      { "value": "33", "label": "Mongoose models" },
+      { "value": "1", "label": "Document behind the page" },
+      { "value": "2", "label": "Files to switch the store on" }
+    ],
+    "notes": [
+      "The storefront is not live. It is built and can be enabled without a rebuild."
+    ]
+  },
+  "stack": [
+    { "group": "Framework", "items": ["Next.js 16", "React 19", "TypeScript"] },
+    { "group": "Data", "items": ["MongoDB", "Mongoose 9"] },
+    { "group": "UI", "items": ["Tailwind CSS 4", "Animated SVG", "Framer Motion"] },
+    { "group": "Infrastructure", "items": ["Linux VPS", "Nginx", "PM2"] }
+  ],
+  "related": ["ags-international", "ags-international-ksa", "darlux"],
+  "seo": {
+    "title": "HMC International Trading · CMS-driven corporate site",
+    "description": "Case study: a single-page corporate site driven by one editable document, with the full AGS storefront platform dormant behind it."
+  }
+}
