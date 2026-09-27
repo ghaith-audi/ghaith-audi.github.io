@@ -14,8 +14,8 @@
   "available": true,
   "languages": "Arabic · English",
   "email": "ghaith.kh.audi@gmail.com",
-  "linkedin": "https://www.linkedin.com/in/ghaith-audi-48626b214",
-  "github": "https://github.com/GhaithAudi",
+  "linkedin": "https://www.linkedin.com/in/ghaithaudi",
+  "github": "https://github.com/ghaith-audi",
   "cv": "",
   "portrait": "/images/portrait.webp",
   "portraitAlt": "Portrait of Ghaith Audi in a navy suit and tie",
@@ -182,10 +182,10 @@
   },
   "contact": {
     "eyebrow": "Contact",
-    "title": "Have a system to build?",
+    "title": "Hiring a backend or full-stack engineer?",
     "body": "Let's build something useful.",
     "button": "Let's talk",
-    "note": "Open to remote roles and relocation. I work in Arabic and English from UTC+3, which overlaps with the Gulf and most of Europe."
+    "note": "I'm looking for a remote role or a position I can relocate for. I work comfortably in Arabic and English, overlap with Gulf and European hours from UTC+3, and can walk you through any sheet in this set in detail."
   },
   "footer": {
     "note": "Drawn in Homs, Syria"
